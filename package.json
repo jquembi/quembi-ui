@@ -1,0 +1,21 @@
+{
+  "name": "quembi-ui-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @quembi-ui/web",
+    "build": "npm run build -w @quembi-ui/web",
+    "preview": "npm run preview -w @quembi-ui/web",
+    "typecheck": "npm run typecheck -w @quembi-ui/web",
+    "check": "npm run typecheck && npm run build",
+    "verify": "node scripts/verify.mjs"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}

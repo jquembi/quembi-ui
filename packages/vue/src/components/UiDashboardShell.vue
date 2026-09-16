@@ -1,0 +1,5 @@
+<script setup lang="ts">
+interface DashboardLink { label: string; href: string; active?: boolean }
+defineProps<{ brand: string; links: DashboardLink[] }>();
+</script>
+<template><div class="min-h-[380px] overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 text-slate-900 md:grid md:grid-cols-[220px_1fr]"><aside class="border-b border-slate-200 bg-white p-4 md:border-b-0 md:border-r"><div class="mb-6 text-lg font-bold">{{ brand }}</div><nav aria-label="Navegação principal" class="flex gap-1 overflow-auto md:flex-col"><a v-for="link in links" :key="link.href" :href="link.href" :aria-current="link.active ? 'page' : undefined" :class="['flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-slate-100', link.active ? 'bg-violet-50 font-semibold text-violet-700' : 'text-slate-600']">{{ link.label }}</a></nav><div v-if="$slots.sidebarFooter" class="mt-6 border-t border-slate-100 pt-4"><slot name="sidebarFooter" /></div></aside><div class="min-w-0"><div class="border-b border-slate-200 bg-white px-5 py-4"><slot name="header">Visão geral</slot></div><main class="p-5"><slot /></main></div></div></template>
