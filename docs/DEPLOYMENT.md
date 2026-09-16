@@ -1,10 +1,14 @@
-# Publicação do website Quembi UI
+# Publicação do Quembi UI — Cloudflare Pages
 
-> Estado: o website é estático. O catálogo Premium contém apenas demonstrações conceptuais; não existe checkout, autenticação ou entrega de produtos pagos.
+**Destino pretendido:** https://ui.josequembi.com/  
+**Fonte:** repositório público `jquembi/quembi-ui`, branch `main`.  
+**Estado:** configuração do código pronta; a criação do projecto Cloudflare, ligação ao GitHub e associação do domínio dependem do titular da conta. Não afirmar que o domínio já está activo sem confirmar o deploy.
 
-## Antes de publicar
+O website é estático (Vite, React e Tailwind CSS) e a compilação usa `base: '/'`, pois o subdomínio serve o site na raiz. O Premium no catálogo consiste apenas em demonstrações conceptuais; não há checkout, login ou distribuição comercial funcional.
 
-Na raiz do monorepo, com Node.js 22+ e npm:
+## 1. Validar o código
+
+Na raiz do repositório, com Node.js 22 e npm:
 
 ```bash
 npm ci
@@ -14,39 +18,55 @@ npm run smoke
 npm run preview
 ```
 
-Abre o endereço apresentado por `npm run preview` e revê manualmente a homepage, pesquisa, filtros, navegação por teclado, modal, pré-visualizações e disposição em ecrãs móveis e desktop. **A compilação automática não substitui esta revisão visual.** Não introduzas produtos Premium privados no repositório público nem em `apps/web/public`.
+Abre o URL apresentado pelo comando `preview` e valida visualmente homepage, pesquisa, filtros, modal, cópia de código, teclado e diferentes tamanhos de ecrã. A integração contínua verifica a compilação mas não substitui um teste visual no browser. A CI conserva o artefacto `quembi-ui-website` durante sete dias.
 
-A pipeline GitHub Actions executa as verificações anteriores (excepto `preview`) e guarda um artefacto `quembi-ui-website` com o conteúdo de `apps/web/dist` por 7 dias. Para o obter, abre a execução de CI bem-sucedida em **Actions → CI → Artifacts**. Esse ZIP é um build estático, não o código-fonte.
+## 2. Criar Cloudflare Pages ligado ao GitHub (uma única vez)
 
-## Cloudflare Pages ligado ao GitHub
+Na conta Cloudflare que irá gerir o site:
 
-1. No painel Cloudflare, abre **Workers & Pages** e cria um projecto **Pages** ligado ao GitHub.
-2. Escolhe `jquembi/quembi-ui` e o ramo de produção `main`.
-3. Configura as opções de compilação:
+1. Abre **Workers & Pages → Create → Pages → Connect to Git** (os nomes podem variar no painel).
+2. Autoriza o acesso ao GitHub e selecciona **`jquembi/quembi-ui`**. Não autorizes mais repositórios do que os necessários.
+3. Escolhe **`main`** como production branch e um nome de projecto Pages disponível, por exemplo **`quembi-ui`**. O endereço temporário será atribuído pela Cloudflare; não assumes que `quembi-ui.pages.dev` está disponível antes de o painel confirmar.
+4. Configura a compilação a partir da **raiz do monorepo**, e não apenas de `apps/web`:
 
-   | Campo | Valor |
-   | --- | --- |
-   | Root directory | Raiz do repositório (em branco ou `/`, conforme o painel) |
-   | Build command | `npm run check && npm run smoke` |
-   | Build output directory | `apps/web/dist` |
-   | Node.js | 22+ (configuração do ambiente de compilação) |
+| Campo | Valor |
+| --- | --- |
+| Framework preset | `None` ou Vite, desde que os campos manuais abaixo sejam respeitados |
+| Root directory | raiz do repositório (em branco ou `/`, segundo o painel) |
+| Build command | `npm ci && npm run verify && npm run check && npm run smoke` |
+| Build output directory | `apps/web/dist` |
+| Production branch | `main` |
+| Environment variable | `NODE_VERSION=22` (quando necessário para seleccionar Node 22) |
 
-4. Publica, abre o URL `*.pages.dev` atribuído pela Cloudflare e testa novamente mobile e desktop.
-5. Liga um domínio personalizado apenas depois de confirmares o domínio e a titularidade da marca.
+Se o ambiente já instalar as dependências automaticamente, `npm ci` continuará a criar uma instalação reprodutível a partir do `package-lock.json`. Não configures `GITHUB_PAGES=true`: foi descontinuado. Não uses `/quembi-ui/` como caminho base.
 
-`VITE_SALES_EMAIL` é opcional: deve conter apenas um endereço comercial público para um link `mailto:`. **Qualquer variável `VITE_*` é incluída no código do browser: nunca coloques tokens, chaves de pagamento ou segredos nestas variáveis.**
+5. Executa o primeiro deploy. Verifica o endereço `*.pages.dev` que a Cloudflare atribuir e confirma que HTML, CSS, JS e favicon carregam sem 404.
 
-## Publicação estática manual
+Após a integração Git estar activa, novos commits na `main` desencadeiam deploys automáticos pela própria Cloudflare, sem tokens Cloudflare no repositório e sem GitHub Actions de deploy. A CI no GitHub continua a executar verificações independentes.
 
-Depois de `npm run check && npm run smoke`, publica **só os ficheiros de `apps/web/dist/`** num serviço de hosting estático. Não publiques a raiz do monorepo, `packages/`, ficheiros `.env` ou código comercial privado.
+## 3. Ligar o subdomínio ui.josequembi.com
+
+No projecto Pages criado, abre **Custom domains → Set up a custom domain** e introduz **`ui.josequembi.com`**. Segue as instruções mostradas no painel:
+
+- Se a zona `josequembi.com` estiver activa na mesma conta Cloudflare, o assistente poderá criar/gerir automaticamente o registo DNS necessário. Confirma o registo e evita criar outro com o mesmo nome.
+- Se o DNS estiver noutro fornecedor, segue o destino CNAME **exacto** indicado pelo projecto Pages; não adivinhes o endereço `*.pages.dev`. Se o painel exigir mover a zona para a Cloudflare ou confirmar titularidade, conclui esse processo pelo proprietário.
+- Não alteres o registo do domínio principal `josequembi.com` ou os registos de email (MX, SPF, DKIM). Se `ui` já estiver em uso, verifica o serviço actual antes de substituir o DNS.
+- Aguarda a validação do domínio e emissão/activação de HTTPS pelo painel; confirma que `https://ui.josequembi.com/` carrega o site e os recursos `/assets/...` e `/favicon.svg`.
+
+A associação do domínio não pode ser feita apenas por um commit no GitHub: requer acesso à conta Cloudflare e, consoante o caso, às definições DNS do domínio.
+
+## 4. Segurança, produção e diagnóstico
+
+- Publica **apenas `apps/web/dist`**. Nunca disponibilizes a raiz do repositório, `.env`, tokens, ou ficheiros Premium privados.
+- `VITE_SALES_EMAIL` é opcional e será visível no browser. Não uses variáveis `VITE_*` para segredos ou chaves de pagamento.
+- Se o build passar mas o domínio não abrir, confirma o primeiro deploy `*.pages.dev`, o estado de **Custom domains**, os registos DNS e o certificado SSL/TLS. Se CSS/JS falharem com 404, confirma que a compilação usa `base: '/'`, a raiz do monorepo e a pasta de saída correcta.
+- O antigo workflow de GitHub Pages foi removido para evitar publicações duplicadas e execuções a falhar. A hospedagem principal é Cloudflare Pages com integração Git.
 
 ## Checklist de lançamento
 
-- [x] `package-lock.json` versionado; CI instala com `npm ci`.
-- [x] CI verifica integridade, TypeScript, build e existência dos recursos estáticos.
-- [x] O build está disponível como artefacto temporário da CI.
-- [ ] Rever visualmente o site em browser, mobile e desktop e confirmar navegação por teclado.
-- [ ] Publicar o site no Cloudflare Pages e testar o URL real.
-- [ ] Confirmar domínio, direitos de marca, contactos e identidade comercial.
-- [ ] Disponibilizar termos e privacidade reais antes de recolher dados pessoais.
-- [ ] Implementar pagamentos, licenças e entrega em infraestrutura privada antes de oferecer checkout Premium.
+- [x] Código com caminhos de assets para a raiz do domínio e CI com instalação/compilação/smoke tests.
+- [ ] Projecto Pages criado e GitHub associado pelo titular da conta Cloudflare.
+- [ ] Primeiro deploy confirmado no endereço `*.pages.dev` fornecido pelo painel.
+- [ ] Subdomínio `ui.josequembi.com` associado e HTTPS confirmado.
+- [ ] Teste manual da interface e navegação em telemóvel e desktop.
+- [ ] Termos/privacidade reais antes de recolher dados pessoais; infraestrutura privada separada antes de comercializar Premium.
