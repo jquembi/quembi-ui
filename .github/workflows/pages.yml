@@ -39,10 +39,8 @@ jobs:
         run: npm run smoke
         env:
           GITHUB_PAGES: 'true'
-      - name: Configure or enable GitHub Pages
+      - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - name: Upload static site
         uses: actions/upload-pages-artifact@v3
         with:
