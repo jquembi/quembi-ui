@@ -14,7 +14,11 @@
     "typecheck": "npm run typecheck -w @quembi-ui/web",
     "check": "npm run typecheck && npm run build",
     "verify": "node scripts/verify.mjs",
-    "smoke": "node scripts/smoke-build.mjs"
+    "verify:deploy": "node scripts/verify-deploy.mjs",
+    "smoke": "node scripts/smoke-build.mjs",
+    "cloudflare:whoami": "npx --yes wrangler@4 whoami",
+    "cloudflare:project:create": "npx --yes wrangler@4 pages project create quembi-ui --production-branch=main",
+    "deploy:pages": "npm run verify && npm run verify:deploy && npm run check && npm run smoke && npx --yes wrangler@4 pages deploy apps/web/dist --project-name=quembi-ui --branch=main"
   },
   "engines": {
     "node": ">=20.19.0"
