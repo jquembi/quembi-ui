@@ -26,40 +26,31 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           if [[ -z "$CLOUDFLARE_API_TOKEN" || -z "$CLOUDFLARE_ACCOUNT_ID" ]]; then
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Cloudflare deploy skipped: configure CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in repository or cloudflare-pages environment secrets."
-            echo "### Cloudflare: deploy não executado" >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::Cloudflare deploy blocked: configure CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in repository or cloudflare-pages environment secrets."
+            echo "### Cloudflare: deploy bloqueado (credenciais em falta)" >> "$GITHUB_STEP_SUMMARY"
             echo "Configura os dois secrets do GitHub e executa novamente este workflow. Consulta docs/DEPLOYMENT.md." >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "ready=true" >> "$GITHUB_OUTPUT"
+            exit 1
           fi
+          echo "ready=true" >> "$GITHUB_OUTPUT"
       - name: Checkout
-        if: steps.credentials.outputs.ready == 'true'
         uses: actions/checkout@v4
       - name: Set up Node.js
-        if: steps.credentials.outputs.ready == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
           cache-dependency-path: package-lock.json
       - name: Install dependencies
-        if: steps.credentials.outputs.ready == 'true'
         run: npm ci --no-audit --no-fund
       - name: Verify components and catalogue
-        if: steps.credentials.outputs.ready == 'true'
         run: npm run verify
       - name: Verify Wrangler deployment config
-        if: steps.credentials.outputs.ready == 'true'
         run: npm run verify:deploy
       - name: Type-check and build website
-        if: steps.credentials.outputs.ready == 'true'
         run: npm run check
       - name: Verify built static assets
-        if: steps.credentials.outputs.ready == 'true'
         run: npm run smoke
       - name: Deploy static website with Wrangler
-        if: steps.credentials.outputs.ready == 'true'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -67,7 +58,6 @@ jobs:
           wranglerVersion: '4'
           command: pages deploy apps/web/dist --project-name=quembi-ui --branch=main
       - name: Deployment summary
-        if: steps.credentials.outputs.ready == 'true'
         run: |
           echo "### Cloudflare Pages: deploy submetido" >> "$GITHUB_STEP_SUMMARY"
           echo "Projecto: quembi-ui · Branch: main · Domínio pretendido: https://ui.josequembi.com/" >> "$GITHUB_STEP_SUMMARY"
