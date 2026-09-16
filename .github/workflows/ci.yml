@@ -19,3 +19,10 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npm run verify
       - run: npm run check
+      - run: npm run smoke
+      - uses: actions/upload-artifact@v4
+        with:
+          name: quembi-ui-website
+          path: apps/web/dist/
+          if-no-files-found: error
+          retention-days: 7
