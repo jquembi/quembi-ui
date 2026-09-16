@@ -1,64 +1,54 @@
 # ◈ Quembi UI
 
-**Biblioteca visual de componentes e layouts personalizados para React, Vue e Tailwind CSS 4.** Um monorepo com website público, galeria interactiva, componentes Free de código aberto e demonstrações de produtos Premium.
+**Biblioteca visual de componentes e layouts personalizados para React, Vue e Tailwind CSS 4.** Monorepo com website público, galeria interactiva, componentes Free de código aberto e demonstrações conceptuais Premium.
 
-> Estado: **starter funcional em desenvolvimento (beta)**. Este pacote é entregue como código-fonte inicial; o repositório remoto, a publicação do site, a plataforma de pagamentos e o fornecimento dos produtos Premium não estão activados automaticamente.
+> **Beta:** o código está no GitHub. O website está preparado para GitHub Pages, mas a primeira publicação depende de activar **Settings → Pages → Source: GitHub Actions** na conta proprietária. O checkout e a distribuição dos produtos Premium ainda não estão implementados.
 
-## O que já está implementado
+**Website (após activar o Pages): https://jquembi.github.io/quembi-ui/** · [Guia GitHub Pages](docs/GITHUB_PAGES.md) · [Workflow de publicação](.github/workflows/pages.yml)
 
-- Website responsivo com identidade visual, navegação móvel, catálogo pesquisável e filtros por categoria, licença e framework.
-- Pré-visualização interactiva de oito componentes Free escritos em React e implementações correspondentes em Vue 3.
-- Exemplos de utilização React/Vue que podem ser copiados; o código-fonte completo dos componentes Free encontra-se em `packages/`.
-- Quatro demonstrações **conceptuais** Premium: Analytics Command, Commerce Studio, Auth Experience e Launch Landing. As imagens são construídas por markup de apresentação; **não são produtos Premium funcionais**.
-- Secções de documentação, benefícios, licenças, contacto comercial configurável, indicação de licença e suporte a teclado.
-- Workflow de validação CI, configuração para Cloudflare Pages e documentação de arquitectura, contribuição, licenças e lançamento.
+## O que está implementado
+
+- Website responsivo com navegação móvel, pesquisa, filtros por categoria, licença e framework, previews e exemplos copiáveis.
+- Oito componentes Free em React e oito implementações correspondentes em Vue 3, sob licença MIT.
+- Quatro demonstrações **conceptuais** Premium: Analytics Command, Commerce Studio, Auth Experience e Launch Landing. **Não são produtos Premium funcionais nem estão disponíveis para compra.**
+- Documentação de arquitectura, licenças, desenvolvimento, deploy e contribuição.
+- GitHub Actions de integração contínua e deploy automático do website estático, após activação inicial do Pages.
 
 ## Estrutura
 
 ```text
 quembi-ui/
-├── apps/
-│   └── web/                 # Website Vite + React + TS + Tailwind 4
-│       ├── public/
-│       └── src/
-│           ├── components/  # Galeria e iconografia
-│           └── data/        # Catálogo e snippets React/Vue
-├── packages/
-│   ├── react/               # 8 componentes Free React
-│   └── vue/                 # 8 componentes Free Vue 3
-├── docs/
-│   ├── ARCHITECTURE.md
-│   ├── LICENSING.md
-│   ├── ROADMAP.md
-│   └── DEPLOYMENT.md
-├── .github/workflows/ci.yml
-└── .env.example
+├── apps/web/                   # Vite + React + TypeScript + Tailwind 4
+├── packages/react/             # Componentes Free React
+├── packages/vue/               # Componentes Free Vue 3
+├── docs/                       # Arquitectura, licenças e deploy
+├── scripts/                    # Verificação e smoke tests
+└── .github/workflows/          # CI e GitHub Pages
 ```
 
-## Requisitos e instalação
+## Instalação e desenvolvimento
 
-- Node.js **20.19+** ou 22+; npm 10+.
-- Internet para descarregar dependências na primeira instalação.
+Requer Node.js 20.19+ (recomendado 22+) e npm 10+. Na raiz do repositório:
 
 ```bash
 git clone https://github.com/jquembi/quembi-ui.git
 cd quembi-ui
-npm install
+npm ci
 npm run dev
 ```
 
-**Se ainda não criaste o repositório:** extrai o ZIP, abre a pasta `quembi-ui` e executa os três comandos começando por `npm install`. O clone acima só funcionará depois da publicação no GitHub.
-
-Abre `http://localhost:5173`. Outros comandos:
+Abre `http://localhost:5173`. Comandos disponíveis:
 
 ```bash
-npm run typecheck       # TypeScript
-npm run build           # Cria apps/web/dist
-npm run preview         # Pré-visualiza o website compilado
-npm run verify          # Verificações de integridade do projecto
+npm run verify       # Integridade do catálogo e estrutura
+npm run typecheck    # TypeScript
+npm run build        # Compila o website em apps/web/dist
+npm run smoke        # Confere HTML e assets depois do build
+npm run check        # TypeScript + build
+npm run preview      # Pré-visualização local da compilação
 ```
 
-### Como utilizar o React no monorepo
+### React (dentro do monorepo)
 
 ```tsx
 import { Button, Badge, Input } from '@quembi-ui/react';
@@ -72,7 +62,7 @@ export function Example() {
 }
 ```
 
-### Como utilizar o Vue no monorepo
+### Vue 3 (dentro do monorepo)
 
 ```vue
 <script setup lang="ts">
@@ -86,62 +76,38 @@ const email = ref('');
 </template>
 ```
 
-São bibliotecas **source-first, ainda não publicadas no npm**. Integrações Vue externas precisam de `@vitejs/plugin-vue` (ou ferramenta equivalente). React/Vue devem compilar os ficheiros TypeScript/SFC e incluir as pastas de origem na detecção Tailwind:
+Os pacotes são **source-first e privados para publicação npm** nesta fase: copiar os ficheiros de `packages/` para projectos externos requer configurar o compilador React/Vue e a detecção de classes Tailwind. Para Vue, usa `@vitejs/plugin-vue` ou equivalente. Exemplo Tailwind, ajustando o caminho ao projecto:
 
 ```css
 @import "tailwindcss";
 @source "../../../packages/react/src";
-/* Numa aplicação Vue, ajuste o caminho e use packages/vue/src. */
+/* Em Vue usa packages/vue/src. */
 ```
 
-Não existe ainda uma CLI `npx`, pacote público ou pacote Premium para instalação automática. A proposta de evolução está em `docs/ROADMAP.md`.
+Não existem ainda pacotes npm públicos, CLI de instalação ou backend de pagamentos.
 
-## Licenças Free e Premium
+## GitHub Pages — hospedagem inicial
 
-- **Free**: ficheiros deste repositório distribuídos sob licença MIT (consulta `LICENSE`).
-- **Premium**: apenas metadados e demonstrações conceptuais públicas. Código e produtos privados exigem licença comercial independente e **não devem ser colocados no repositório público**.
-- Nenhuma modalidade de pagamento, criação de conta, verificação de compras ou entrega de produtos pagos está implementada neste starter. Consulta `docs/LICENSING.md`.
+O deployment é feito pelo [workflow Pages](.github/workflows/pages.yml) na `main`. O site fica alojado sob `/quembi-ui/` e a compilação configura automaticamente o `base` do Vite e o favicon. O proprietário precisa **uma única vez** de seleccionar **GitHub Actions** em [Settings → Pages](https://github.com/jquembi/quembi-ui/settings/pages); a integração usada para alterar o código não consegue activar essa opção nas definições da conta.
 
-## Contacto comercial (opcional)
+Depois da activação, cada push à `main` acciona a compilação e publicação do website. O workflow publica apenas `apps/web/dist`; não publica o código-fonte privado Premium. Consulta [docs/GITHUB_PAGES.md](docs/GITHUB_PAGES.md) para activação, URL e resolução de problemas.
+
+Para testar os mesmos caminhos em local:
 
 ```bash
-cp .env.example .env
-# Edita .env e configura VITE_SALES_EMAIL=teu-email@dominio.com
-npm run dev
+# PowerShell: $env:GITHUB_PAGES='true'; npm run check; npm run smoke
+GITHUB_PAGES=true npm run check
+GITHUB_PAGES=true npm run smoke
 ```
 
-Sem `VITE_SALES_EMAIL` válido, o website informa que o contacto está por configurar. Variáveis `VITE_*` ficam **expostas no bundle do browser**: nunca coloques tokens, chaves de pagamento ou palavras-passe ali.
+O [Cloudflare Pages](docs/DEPLOYMENT.md) fica como alternativa futura. O site é estático nesta versão.
 
-## Publicar no GitHub
+## Licenciamento e contacto
 
-Cria um repositório **público, vazio, sem README automático**, chamado `quembi-ui` na conta `jquembi` e depois, na pasta descompactada:
+- **Free:** componentes deste repositório sob licença MIT (`LICENSE`).
+- **Premium:** apenas metadados e demonstrações públicas. Os produtos pagos e respectivos direitos requerem contrato independente; não adicionar código Premium nem segredos a este repositório.
+- `VITE_SALES_EMAIL` é opcional (`.env.example`). Variáveis `VITE_*` são públicas no JavaScript do browser: **nunca** guardar aí palavras-passe, tokens ou chaves de pagamento.
 
-```bash
-git init
-git add .
-git commit -m "feat: initial Quembi UI monorepo"
-git branch -M main
-git remote add origin https://github.com/jquembi/quembi-ui.git
-git push -u origin main
-```
+Consulta [LICENSING](docs/LICENSING.md), [ROADMAP](docs/ROADMAP.md), [ARCHITECTURE](docs/ARCHITECTURE.md) e [CONTRIBUTING](CONTRIBUTING.md).
 
-> Se já tiveres um remoto `origin`, ajusta-o com `git remote set-url origin ...` em vez de adicioná-lo de novo. Confirma o nome e o proprietário reais do repositório antes do push. Repositórios privados com o código Premium devem ficar separados.
-
-## Website / Cloudflare Pages
-
-Importa o repositório no Cloudflare Pages. Comandos para o monorepo:
-
-| Campo | Valor |
-| --- | --- |
-| Root directory | `/` (raiz do repositório) |
-| Build command | `npm run build` |
-| Build output directory | `apps/web/dist` |
-| Node | 22+ |
-
-Consulta `docs/DEPLOYMENT.md` para os passos completos. Não existe backend nesta versão; galeria e documentação funcionam como site estático.
-
-## Qualidade e contribuições
-
-As PRs para a biblioteca Free são bem-vindas. O workflow de CI executa verificação de catálogo, TypeScript e build. Ver `CONTRIBUTING.md` e `docs/ARCHITECTURE.md`.
-
-**Autor / organização:** projecto inicial preparado para a conta `jquembi`. Nome, marca, preços, domínio e termos comerciais são configurações propostas, não dados empresariais confirmados.
+**Proprietário do repositório:** `jquembi`. Marca, domínio próprio, preços e termos comerciais dependem de validação antes do lançamento comercial.
