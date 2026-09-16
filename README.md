@@ -2,9 +2,9 @@
 
 **Biblioteca visual de componentes e layouts personalizados para React, Vue e Tailwind CSS 4.** Monorepo com website público, galeria interactiva, componentes Free de código aberto e demonstrações conceptuais Premium.
 
-> **Beta:** o código está no GitHub. O website está preparado para GitHub Pages, mas a primeira publicação depende de activar **Settings → Pages → Source: GitHub Actions** na conta proprietária. O checkout e a distribuição dos produtos Premium ainda não estão implementados.
+> **Beta:** o código está publicado no GitHub. A hospedagem escolhida é **Cloudflare Pages**, com destino **https://ui.josequembi.com/**. O website ainda depende da criação do projecto Pages, da ligação ao GitHub e da validação do domínio na conta Cloudflare. Não confundir URL pretendido com site já publicado. Checkout e distribuição Premium ainda não estão implementados.
 
-**Website (após activar o Pages): https://jquembi.github.io/quembi-ui/** · [Guia GitHub Pages](docs/GITHUB_PAGES.md) · [Workflow de publicação](.github/workflows/pages.yml)
+**[Guia de deploy Cloudflare Pages](docs/DEPLOYMENT.md)** · **[Repositório](https://github.com/jquembi/quembi-ui)** · **[CI](.github/workflows/ci.yml)**
 
 ## O que está implementado
 
@@ -12,7 +12,7 @@
 - Oito componentes Free em React e oito implementações correspondentes em Vue 3, sob licença MIT.
 - Quatro demonstrações **conceptuais** Premium: Analytics Command, Commerce Studio, Auth Experience e Launch Landing. **Não são produtos Premium funcionais nem estão disponíveis para compra.**
 - Documentação de arquitectura, licenças, desenvolvimento, deploy e contribuição.
-- GitHub Actions de integração contínua e deploy automático do website estático, após activação inicial do Pages.
+- GitHub Actions para integração contínua e build estático; deploy automático pela Cloudflare após o proprietário configurar a integração Git.
 
 ## Estrutura
 
@@ -23,7 +23,7 @@ quembi-ui/
 ├── packages/vue/               # Componentes Free Vue 3
 ├── docs/                       # Arquitectura, licenças e deploy
 ├── scripts/                    # Verificação e smoke tests
-└── .github/workflows/          # CI e GitHub Pages
+└── .github/workflows/ci.yml    # CI, sem deploy duplicado no GitHub Pages
 ```
 
 ## Instalação e desenvolvimento
@@ -76,7 +76,7 @@ const email = ref('');
 </template>
 ```
 
-Os pacotes são **source-first e privados para publicação npm** nesta fase: copiar os ficheiros de `packages/` para projectos externos requer configurar o compilador React/Vue e a detecção de classes Tailwind. Para Vue, usa `@vitejs/plugin-vue` ou equivalente. Exemplo Tailwind, ajustando o caminho ao projecto:
+Os pacotes são **source-first e ainda não publicados no npm**: para usar os componentes de `packages/` em projectos externos, configura o compilador React/Vue e a detecção de classes Tailwind. Para Vue, usa `@vitejs/plugin-vue` ou equivalente. Exemplo Tailwind com caminho ajustado ao projecto:
 
 ```css
 @import "tailwindcss";
@@ -84,23 +84,25 @@ Os pacotes são **source-first e privados para publicação npm** nesta fase: co
 /* Em Vue usa packages/vue/src. */
 ```
 
-Não existem ainda pacotes npm públicos, CLI de instalação ou backend de pagamentos.
+Ainda não existem pacotes npm públicos, CLI de instalação ou backend de pagamentos.
 
-## GitHub Pages — hospedagem inicial
+## Deploy Cloudflare Pages — ui.josequembi.com
 
-O deployment é feito pelo [workflow Pages](.github/workflows/pages.yml) na `main`. O site fica alojado sob `/quembi-ui/` e a compilação configura automaticamente o `base` do Vite e o favicon. O proprietário precisa **uma única vez** de seleccionar **GitHub Actions** em [Settings → Pages](https://github.com/jquembi/quembi-ui/settings/pages); a integração usada para alterar o código não consegue activar essa opção nas definições da conta.
+O website foi adaptado para ser servido na **raiz do subdomínio**, com caminhos de recursos a começar em `/`, e não no antigo subcaminho `/quembi-ui/` do GitHub Pages. O workflow de GitHub Pages foi removido para evitar builds falhados ou hospedagem duplicada.
 
-Depois da activação, cada push à `main` acciona a compilação e publicação do website. O workflow publica apenas `apps/web/dist`; não publica o código-fonte privado Premium. Consulta [docs/GITHUB_PAGES.md](docs/GITHUB_PAGES.md) para activação, URL e resolução de problemas.
+O titular da conta Cloudflare precisa **uma única vez** de ligar o GitHub e criar o projecto Pages em **Workers & Pages → Create → Pages → Connect to Git**, seleccionando `jquembi/quembi-ui` e a `main`. Usa:
 
-Para testar os mesmos caminhos em local:
+| Campo | Valor |
+| --- | --- |
+| Root directory | Raiz do monorepo |
+| Build command | `npm ci && npm run verify && npm run check && npm run smoke` |
+| Build output directory | `apps/web/dist` |
+| Production branch | `main` |
+| Node | `NODE_VERSION=22` se o ambiente não usar Node 22 |
 
-```bash
-# PowerShell: $env:GITHUB_PAGES='true'; npm run check; npm run smoke
-GITHUB_PAGES=true npm run check
-GITHUB_PAGES=true npm run smoke
-```
+Confirma primeiro o endereço `*.pages.dev` atribuído pelo painel. Depois, em **Custom domains**, associa `ui.josequembi.com` e segue as instruções DNS/HTTPS. A associação não pode ser concluída através de um commit no GitHub sem acesso à conta Cloudflare. Com a integração Git activa, cada novo commit na `main` desencadeia automaticamente um novo deploy.
 
-O [Cloudflare Pages](docs/DEPLOYMENT.md) fica como alternativa futura. O site é estático nesta versão.
+O guia completo, incluindo diagnóstico DNS, SSL e checklist, está em [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ## Licenciamento e contacto
 
@@ -110,4 +112,4 @@ O [Cloudflare Pages](docs/DEPLOYMENT.md) fica como alternativa futura. O site é
 
 Consulta [LICENSING](docs/LICENSING.md), [ROADMAP](docs/ROADMAP.md), [ARCHITECTURE](docs/ARCHITECTURE.md) e [CONTRIBUTING](CONTRIBUTING.md).
 
-**Proprietário do repositório:** `jquembi`. Marca, domínio próprio, preços e termos comerciais dependem de validação antes do lançamento comercial.
+**Proprietário do repositório:** `jquembi`. Confirmar configuração do domínio, marca, preços e termos comerciais antes do lançamento comercial.
