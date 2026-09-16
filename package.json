@@ -13,7 +13,8 @@
     "preview": "npm run preview -w @quembi-ui/web",
     "typecheck": "npm run typecheck -w @quembi-ui/web",
     "check": "npm run typecheck && npm run build",
-    "verify": "node scripts/verify.mjs"
+    "verify": "node scripts/verify.mjs",
+    "smoke": "node scripts/smoke-build.mjs"
   },
   "engines": {
     "node": ">=20.19.0"
