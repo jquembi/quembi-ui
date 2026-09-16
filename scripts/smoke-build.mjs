@@ -6,14 +6,15 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const dist = resolve(root, 'apps/web/dist');
 const index = join(dist, 'index.html');
-const base = process.env.GITHUB_PAGES === 'true' ? '/quembi-ui/' : '/';
+const base = '/';
 
 assert.ok(existsSync(index), 'Build missing: apps/web/dist/index.html');
 assert.ok(existsSync(join(dist, 'favicon.svg')), 'Build missing: favicon.svg');
 const html = readFileSync(index, 'utf8');
 assert.match(html, /<div\s+id="root"\s*>/, 'Build missing React root element');
-assert.ok(html.includes(`href="${base}favicon.svg"`), `Favicon must use base ${base}`);
+assert.ok(html.includes('href="/favicon.svg"'), 'Favicon must use the root path /favicon.svg');
 assert.ok(!html.includes('%BASE_URL%'), 'Unresolved Vite BASE_URL placeholder');
+assert.ok(!html.includes('/quembi-ui/'), 'Legacy GitHub Pages subpath leaked into Cloudflare build');
 
 const assetUrls = [...html.matchAll(/(?:src|href)="([^"?#]*\/assets\/[^"?#]+\.(?:js|css))"/g)].map(match => match[1]);
 assert.ok(assetUrls.some(url => url.endsWith('.js')), 'Build missing referenced JavaScript');
@@ -35,4 +36,4 @@ const walk = directory => {
   }
 };
 walk(dist);
-console.log(`PASS: ${base} build contains HTML, favicon, ${assetUrls.length} referenced assets and no secret-looking files.`);
+console.log(`PASS: root build contains HTML, favicon, ${assetUrls.length} referenced assets and no secret-looking files.`);
