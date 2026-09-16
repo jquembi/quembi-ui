@@ -1,0 +1,5 @@
+# Cloudflare Pages (Direct Upload). Website source remains in apps/web/.
+# Run the CLI from the monorepo root; never upload packages/ or private Premium code.
+name = "quembi-ui"
+compatibility_date = "2026-09-16"
+pages_build_output_dir = "./apps/web/dist"
