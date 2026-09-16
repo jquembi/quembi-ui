@@ -49,6 +49,9 @@ jobs:
       - name: Verify components and catalogue
         if: steps.credentials.outputs.ready == 'true'
         run: npm run verify
+      - name: Verify Wrangler deployment config
+        if: steps.credentials.outputs.ready == 'true'
+        run: npm run verify:deploy
       - name: Type-check and build website
         if: steps.credentials.outputs.ready == 'true'
         run: npm run check
