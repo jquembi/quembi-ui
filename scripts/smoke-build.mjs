@@ -15,7 +15,7 @@ assert.match(html, /<div\s+id="root"\s*>/, 'Build missing React root element');
 assert.ok(html.includes(`href="${base}favicon.svg"`), `Favicon must use base ${base}`);
 assert.ok(!html.includes('%BASE_URL%'), 'Unresolved Vite BASE_URL placeholder');
 
-const assetUrls = [...html.matchAll(/(?:src|href)="([^"?#]+\/assets\/[^"?#]+\.(?:js|css))"/g)].map(match => match[1]);
+const assetUrls = [...html.matchAll(/(?:src|href)="([^"?#]*\/assets\/[^"?#]+\.(?:js|css))"/g)].map(match => match[1]);
 assert.ok(assetUrls.some(url => url.endsWith('.js')), 'Build missing referenced JavaScript');
 assert.ok(assetUrls.some(url => url.endsWith('.css')), 'Build missing referenced CSS');
 for (const url of assetUrls) {
