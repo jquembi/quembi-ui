@@ -2,33 +2,35 @@
 
 **Biblioteca visual de componentes e layouts personalizados para React, Vue e Tailwind CSS 4.** Monorepo com website público, galeria interactiva, componentes Free de código aberto e demonstrações conceptuais Premium.
 
-> **Beta:** o código está publicado no GitHub. A hospedagem escolhida é **Cloudflare Pages**, com destino **https://ui.josequembi.com/**. O website ainda depende da criação do projecto Pages, da ligação ao GitHub e da validação do domínio na conta Cloudflare. Não confundir URL pretendido com site já publicado. Checkout e distribuição Premium ainda não estão implementados.
+> **Beta:** o website está preparado para deploy pelo **Wrangler + Cloudflare Pages**, com domínio pretendido **https://ui.josequembi.com/**. A publicação real depende de criar o projecto Cloudflare Direct Upload, configurar os GitHub Secrets e associar o domínio. Não assumir que o endereço já está activo. Checkout e distribuição Premium não estão implementados.
 
-**[Guia de deploy Cloudflare Pages](docs/DEPLOYMENT.md)** · **[Repositório](https://github.com/jquembi/quembi-ui)** · **[CI](.github/workflows/ci.yml)**
+**[Guia Wrangler e Cloudflare](docs/DEPLOYMENT.md)** · **[Workflow de deploy](.github/workflows/deploy-cloudflare.yml)** · **[CI](.github/workflows/ci.yml)**
 
-## O que está implementado
+## Funcionalidades
 
 - Website responsivo com navegação móvel, pesquisa, filtros por categoria, licença e framework, previews e exemplos copiáveis.
-- Oito componentes Free em React e oito implementações correspondentes em Vue 3, sob licença MIT.
-- Quatro demonstrações **conceptuais** Premium: Analytics Command, Commerce Studio, Auth Experience e Launch Landing. **Não são produtos Premium funcionais nem estão disponíveis para compra.**
-- Documentação de arquitectura, licenças, desenvolvimento, deploy e contribuição.
-- GitHub Actions para integração contínua e build estático; deploy automático pela Cloudflare após o proprietário configurar a integração Git.
+- Oito componentes Free React e oito implementações correspondentes Vue 3, sob licença MIT.
+- Quatro demonstrações **conceptuais** Premium: Analytics Command, Commerce Studio, Auth Experience e Launch Landing. Não são produtos pagos operacionais nem estão disponíveis para compra.
+- Documentação de arquitectura, licenças, desenvolvimento, deploy e contribuições.
+- GitHub Actions para CI, compilação e deploy de produção com Wrangler após a configuração inicial dos segredos.
 
 ## Estrutura
 
 ```text
 quembi-ui/
-├── apps/web/                   # Vite + React + TypeScript + Tailwind 4
-├── packages/react/             # Componentes Free React
-├── packages/vue/               # Componentes Free Vue 3
-├── docs/                       # Arquitectura, licenças e deploy
-├── scripts/                    # Verificação e smoke tests
-└── .github/workflows/ci.yml    # CI, sem deploy duplicado no GitHub Pages
+├── apps/web/                        # Vite + React + TypeScript + Tailwind CSS 4
+├── packages/react/                  # Componentes Free React
+├── packages/vue/                    # Componentes Free Vue 3
+├── wrangler.toml                    # Cloudflare Pages: nome e pasta pública
+├── .github/workflows/ci.yml         # Verificações a cada PR e push na main
+├── .github/workflows/deploy-cloudflare.yml # Deploy Wrangler na main
+├── docs/                            # Arquitectura, licenças e deploy
+└── scripts/                         # Verificações de source, deploy e build
 ```
 
-## Instalação e desenvolvimento
+## Instalação
 
-Requer Node.js 20.19+ (recomendado 22+) e npm 10+. Na raiz do repositório:
+Requer Node.js 20.19+ (recomendado Node 22) e npm 10+. Na raiz do repositório:
 
 ```bash
 git clone https://github.com/jquembi/quembi-ui.git
@@ -37,18 +39,23 @@ npm ci
 npm run dev
 ```
 
-Abre `http://localhost:5173`. Comandos disponíveis:
+Abre `http://localhost:5173`.
 
-```bash
-npm run verify       # Integridade do catálogo e estrutura
-npm run typecheck    # TypeScript
-npm run build        # Compila o website em apps/web/dist
-npm run smoke        # Confere HTML e assets depois do build
-npm run check        # TypeScript + build
-npm run preview      # Pré-visualização local da compilação
-```
+| Comando | Acção |
+| --- | --- |
+| `npm run dev` | Inicia o website local. |
+| `npm run verify` | Confere catálogo e componentes Free. |
+| `npm run verify:deploy` | Confere a configuração Wrangler e o workflow. |
+| `npm run check` | TypeScript e compilação do website. |
+| `npm run smoke` | Verifica o HTML, favicon, CSS, JS e exposição de ficheiros sensíveis. |
+| `npm run preview` | Mostra o website compilado em local. |
+| `npm run cloudflare:whoami` | Consulta a autenticação da CLI Wrangler. |
+| `npm run cloudflare:project:create` | Cria uma vez o projecto Pages Direct Upload `quembi-ui`. |
+| `npm run deploy:pages` | Valida, compila e publica o website via Wrangler, com autenticação local. |
 
-### React (dentro do monorepo)
+A CLI Wrangler é obtida por `npx wrangler@4` nos comandos locais e por `cloudflare/wrangler-action@v3` no GitHub Actions. Não é preciso alterar o `package-lock.json` apenas para instalar a CLI no deploy. Antes do deploy manual, inicia sessão com `npx --yes wrangler@4 login` ou configura as credenciais no teu ambiente sem as versionar.
+
+### React no monorepo
 
 ```tsx
 import { Button, Badge, Input } from '@quembi-ui/react';
@@ -62,7 +69,7 @@ export function Example() {
 }
 ```
 
-### Vue 3 (dentro do monorepo)
+### Vue 3 no monorepo
 
 ```vue
 <script setup lang="ts">
@@ -76,40 +83,34 @@ const email = ref('');
 </template>
 ```
 
-Os pacotes são **source-first e ainda não publicados no npm**: para usar os componentes de `packages/` em projectos externos, configura o compilador React/Vue e a detecção de classes Tailwind. Para Vue, usa `@vitejs/plugin-vue` ou equivalente. Exemplo Tailwind com caminho ajustado ao projecto:
+Os pacotes são **source-first e ainda não publicados no npm**. Para usar `packages/` em projectos externos, configura a compilação React/Vue e a detecção de classes Tailwind. Em projectos Vue usa `@vitejs/plugin-vue` ou equivalente. Exemplo de Tailwind (ajustar caminhos):
 
 ```css
 @import "tailwindcss";
 @source "../../../packages/react/src";
-/* Em Vue usa packages/vue/src. */
+/* Em projectos Vue, usa packages/vue/src. */
 ```
 
-Ainda não existem pacotes npm públicos, CLI de instalação ou backend de pagamentos.
+Não existem ainda pacotes npm públicos, CLI própria da biblioteca ou backend de pagamentos.
 
-## Deploy Cloudflare Pages — ui.josequembi.com
+## Deploy no Cloudflare Pages com Wrangler
 
-O website foi adaptado para ser servido na **raiz do subdomínio**, com caminhos de recursos a começar em `/`, e não no antigo subcaminho `/quembi-ui/` do GitHub Pages. O workflow de GitHub Pages foi removido para evitar builds falhados ou hospedagem duplicada.
+O website é servido na **raiz do domínio**, com `base: '/'` e os recursos em `/assets/`. O Wrangler publica somente `apps/web/dist`, conforme [`wrangler.toml`](wrangler.toml). Não existe workflow de GitHub Pages.
 
-O titular da conta Cloudflare precisa **uma única vez** de ligar o GitHub e criar o projecto Pages em **Workers & Pages → Create → Pages → Connect to Git**, seleccionando `jquembi/quembi-ui` e a `main`. Usa:
+**Configuração inicial do proprietário (uma vez):** cria ou confirma o projecto **Cloudflare Pages Direct Upload** `quembi-ui` (não uses a integração Cloudflare «Connect to Git» para este fluxo). No GitHub, adiciona os secrets `CLOUDFLARE_API_TOKEN` e `CLOUDFLARE_ACCOUNT_ID` em **Settings → Secrets and variables → Actions**. O token deve ter permissão de edição de Cloudflare Pages na conta correcta. Não copies o token para código, issues, chats ou variáveis `VITE_*`.
 
-| Campo | Valor |
-| --- | --- |
-| Root directory | Raiz do monorepo |
-| Build command | `npm ci && npm run verify && npm run check && npm run smoke` |
-| Build output directory | `apps/web/dist` |
-| Production branch | `main` |
-| Node | `NODE_VERSION=22` se o ambiente não usar Node 22 |
+Abre [Actions → Deploy Cloudflare Pages (Wrangler)](https://github.com/jquembi/quembi-ui/actions/workflows/deploy-cloudflare.yml) e executa **Run workflow → main** após a configuração inicial. Cada novo push na `main` repetirá a validação, compilação e publicação. Se faltarem secrets, o workflow avisa que o deploy foi ignorado, sem publicar. A CI independente continua a verificar o código.
 
-Confirma primeiro o endereço `*.pages.dev` atribuído pelo painel. Depois, em **Custom domains**, associa `ui.josequembi.com` e segue as instruções DNS/HTTPS. A associação não pode ser concluída através de um commit no GitHub sem acesso à conta Cloudflare. Com a integração Git activa, cada novo commit na `main` desencadeia automaticamente um novo deploy.
+Depois de confirmar o endereço temporário `*.pages.dev` no painel Cloudflare, associa **`ui.josequembi.com`** em **Pages → Custom domains** e confirma DNS e HTTPS. Não alteres o DNS do domínio principal ou os registos de correio. **Um commit no GitHub não cria o projecto Pages nem associa um domínio por si só.**
 
-O guia completo, incluindo diagnóstico DNS, SSL e checklist, está em [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+Para instruções completas, autenticação, criação do projecto por Wrangler, diagnóstico de erros e checklist de produção, consulta **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**.
 
 ## Licenciamento e contacto
 
 - **Free:** componentes deste repositório sob licença MIT (`LICENSE`).
-- **Premium:** apenas metadados e demonstrações públicas. Os produtos pagos e respectivos direitos requerem contrato independente; não adicionar código Premium nem segredos a este repositório.
-- `VITE_SALES_EMAIL` é opcional (`.env.example`). Variáveis `VITE_*` são públicas no JavaScript do browser: **nunca** guardar aí palavras-passe, tokens ou chaves de pagamento.
+- **Premium:** apenas metadados e demonstrações conceptuais públicas. Produtos pagos e direitos comerciais exigem contrato independente; nunca colocar código Premium privado neste repositório.
+- `VITE_SALES_EMAIL` é opcional (`.env.example`), mas qualquer variável `VITE_*` torna-se pública no JavaScript do browser. Nunca guardar tokens, palavras-passe ou chaves de pagamento.
 
 Consulta [LICENSING](docs/LICENSING.md), [ROADMAP](docs/ROADMAP.md), [ARCHITECTURE](docs/ARCHITECTURE.md) e [CONTRIBUTING](CONTRIBUTING.md).
 
-**Proprietário do repositório:** `jquembi`. Confirmar configuração do domínio, marca, preços e termos comerciais antes do lançamento comercial.
+**Proprietário:** `jquembi`. Confirmar domínio, marca, preços e termos comerciais antes do lançamento comercial.
