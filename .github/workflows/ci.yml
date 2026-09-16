@@ -18,6 +18,7 @@ jobs:
           cache-dependency-path: package-lock.json
       - run: npm ci --no-audit --no-fund
       - run: npm run verify
+      - run: npm run verify:deploy
       - run: npm run check
       - run: npm run smoke
       - uses: actions/upload-artifact@v4
